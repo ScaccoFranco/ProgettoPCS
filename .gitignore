@@ -1,0 +1,42 @@
+# ──────────────────────────────
+#  BUILD & CMAKE
+# ──────────────────────────────
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+install_manifest.txt
+Makefile
+
+# ──────────────────────────────
+#  COMPILATI
+# ──────────────────────────────
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+*.exe
+*.out
+*.app
+
+# ──────────────────────────────
+#  VS CODE
+# ──────────────────────────────
+.vscode/
+
+# ──────────────────────────────
+#  SISTEMA OPERATIVO
+# ──────────────────────────────
+# Linux
+*~
+.fuse_hidden*
+.Trash-*
+
+# macOS (per sicurezza)
+.DS_Store
+
+# Windows (per sicurezza)
+Thumbs.db
