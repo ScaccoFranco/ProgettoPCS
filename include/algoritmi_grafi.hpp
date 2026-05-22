@@ -145,3 +145,74 @@ std::map<T, int> dijkstra(const unidirected_graph<T>& G, T sorgente)
     return dist;
 }
 
+
+
+
+/// ALGORITMI SU CICLI
+
+// CICLO BASATO SU DFS
+/*
+Si calcola l’albero DFS T = dfs(G) ed il coalbero C = G \ T . Ciascun lato del coalbero, se
+reinserito nell’albero DFS, richiude un ciclo del grafo originale. Si procede dunque come segue:
+1. Per ogni lato (u, v) ∈ C si calcola il percorso tra u e v in T . Il percorso deve necessariamente
+esistere.
+2. Durante la visita di T si memorizzano tutti i nodi attraversati a partire da u, una volta
+raggiunto v si aggiunge il percorso alla lista dei cicli trovati.
+3. Si itera fino ad esaurire gli archi di C.
+L’algoritmo di ricerca del percorso tra u e v può essere qualcosa simile all’Algoritmo 1
+Algorithm 1: Finding a path between u and v
+Input: DFS tree T ; Nodes u, v
+Output: Path between u and v in T
+findpath (T, u, v)
+visited[u] = true;
+path.push(u);
+if u == v then
+return true
+for n ∈ neighbours(u) do
+if not visited[n] then
+if findpath(T, n, v) then
+return true
+path.pop();
+return false
+*/
+template<typename T>
+bool find_path(const unidirected_graph<T> G, std::set<T>& visitati, unidirected_graph<T>& albero, std::vector<T>& percorso, T sorgente, T arrivo) 
+{
+    visitati.insert(sorgente);
+    percorso.push_back(sorgente);
+
+    if (sorgente == arrivo) 
+        return true;
+
+    for (const T& vicino : G.neighbors(sorgente))
+    {
+        if (visitati.find(vicino) == visitati.end())
+        {
+            if (find_path(G, visitati, vicino, arrivo))
+                return true;
+        }
+    }
+    
+    percorso.pop_back();
+    return false;
+}
+
+template<typename T>
+std::set<unidirected_graph<T>> cicli_dfs (const unidirected_graph<T> G) 
+{
+    std::vector<std::vector<T>> cicli;
+    unidirected_graph<T> DFS = recursive_dfs(G, sorgente);
+    unidirected_graph<T> C = G - DFS;
+
+    for (const unidirected_edge<T>& arco : C.all_edges())
+    {
+        std::set<T> visitati;
+        std::vector<T> percorso;
+
+        if (find_path(DFS, visitati, percorso, arco.from(), arco.to()))
+            cicli.push_back(percorso);
+    }
+
+    return cicli;
+}
+
