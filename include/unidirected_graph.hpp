@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
-
+#include "unidirected_edge.hpp"
 
 template<typename T>
 class unidirected_graph

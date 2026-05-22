@@ -176,7 +176,7 @@ path.pop();
 return false
 */
 template<typename T>
-bool find_path(const unidirected_graph<T> G, std::set<T>& visitati, unidirected_graph<T>& albero, std::vector<T>& percorso, T sorgente, T arrivo) 
+bool find_path(const unidirected_graph<T> G, std::set<T>& visitati, std::vector<T>& percorso, T sorgente, T arrivo) 
 {
     visitati.insert(sorgente);
     percorso.push_back(sorgente);
@@ -188,7 +188,7 @@ bool find_path(const unidirected_graph<T> G, std::set<T>& visitati, unidirected_
     {
         if (visitati.find(vicino) == visitati.end())
         {
-            if (find_path(G, visitati, vicino, arrivo))
+            if (find_path(G, visitati, percorso,  vicino, arrivo))
                 return true;
         }
     }
@@ -197,10 +197,12 @@ bool find_path(const unidirected_graph<T> G, std::set<T>& visitati, unidirected_
     return false;
 }
 
+
+// verificare se va bene vector o se serve usare grafi
 template<typename T>
-std::set<unidirected_graph<T>> cicli_dfs (const unidirected_graph<T> G) 
+std::set<std::vector<T>> cicli_dfs (const unidirected_graph<T> G, T sorgente) 
 {
-    std::vector<std::vector<T>> cicli;
+    std::set<std::vector<T>> cicli;
     unidirected_graph<T> DFS = recursive_dfs(G, sorgente);
     unidirected_graph<T> C = G - DFS;
 
@@ -210,7 +212,7 @@ std::set<unidirected_graph<T>> cicli_dfs (const unidirected_graph<T> G)
         std::vector<T> percorso;
 
         if (find_path(DFS, visitati, percorso, arco.from(), arco.to()))
-            cicli.push_back(percorso);
+            cicli.insert(percorso);
     }
 
     return cicli;

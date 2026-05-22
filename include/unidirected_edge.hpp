@@ -2,7 +2,6 @@
 
 #include <ostream>
 
-
 template<typename T>
 class unidirected_edge 
 {
