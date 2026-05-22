@@ -1,75 +1,124 @@
-# ProgettoPCS
-Progetto di programmazione e calcolo scientifico
-# Git & GitHub — Guida per lavori di gruppo (3 persone)
-
-## Concetti base da tenere a mente
-
-- **Repository remota**: il codice condiviso su GitHub
-- **Repository locale**: la copia sul tuo PC
-- **Branch**: una "linea di sviluppo" separata dal ramo principale
-- **Commit**: uno snapshot del codice in un dato momento
-- **Push/Pull**: inviare/ricevere modifiche dalla repository remota
+# Git & GitHub — Guida per ProgettoPCS
+> Repository: [ScaccoFranco/ProgettoPCS](https://github.com/ScaccoFranco/ProgettoPCS)
+> Progetto di Programmazione e Calcolo Scientifico — gruppo di 3
 
 ---
 
-## Setup iniziale (una volta sola)
+## Setup iniziale (una volta sola, per chi non ha ancora clonato)
 
-### Chi crea il repository (una persona del gruppo)
+Il repository esiste già su GitHub. Gli altri due membri del gruppo devono solo clonarlo:
 
 ```bash
-# Crea la repo su GitHub dal sito, poi collega quella locale:
-git init
-git remote add origin https://github.com/utente/nome-repo.git
-git branch -M main
-git push -u origin main
+git clone https://github.com/ScaccoFranco/ProgettoPCS.git
+cd ProgettoPCS
 ```
 
-### Gli altri due si clonano la repo
+Poi configurate il vostro nome (se non l'avete già fatto):
 
 ```bash
-git clone https://github.com/utente/nome-repo.git
-cd nome-repo
-```
-
-### Configurare il proprio nome (tutti e tre)
-
-```bash
-git config --global user.name "Il Tuo Nome"
+git config --global user.name "Nome Cognome"
 git config --global user.email "tua@email.com"
+```
+
+Per usare SSH invece di HTTPS (evita di reinserire la password ogni volta):
+
+```bash
+# Genera la chiave se non ce l'hai
+ssh-keygen -t ed25519 -C "tua@email.com"
+# Copia la chiave pubblica e aggiungila su GitHub → Settings → SSH Keys
+cat ~/.ssh/id_ed25519.pub
+# Poi cambia il remote sulla repo locale
+git remote set-url origin git@github.com:ScaccoFranco/ProgettoPCS.git
+```
+
+---
+
+## .gitignore — da aggiungere subito
+
+Prima di iniziare a scrivere codice, aggiungete un `.gitignore` adatto a C++/CMake:
+
+```
+# Build
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Binari e oggetti
+*.o
+*.a
+*.so
+*.exe
+*.out
+
+# Editor
+.vscode/
+.idea/
+*.user
+
+# Sistema
+.DS_Store
+Thumbs.db
+```
+
+```bash
+# Creare e committare il .gitignore
+touch .gitignore
+# ... incollate il contenuto sopra ...
+git add .gitignore
+git commit -m "Aggiunge .gitignore per C++/CMake"
+git push origin main
 ```
 
 ---
 
 ## Flusso di lavoro quotidiano
 
-### 1. Prima di iniziare a lavorare — aggiornati sempre
+### 1. Prima di iniziare — sempre
 
 ```bash
 git pull origin main
 ```
 
-Scarica le ultime modifiche degli altri. **Fallo ogni volta che apri il progetto.**
+Scarica le ultime modifiche degli altri. **Obbligatorio ogni volta che aprite il progetto.**
 
-### 2. Crea un branch per la tua feature/parte
+### 2. Crea un branch per la tua parte
 
 ```bash
 git checkout -b nome-branch
-# Esempio: git checkout -b feature/login
-# Esempio: git checkout -b fix/calcolo-media
 ```
 
-Lavora **sempre su un branch separato**, mai direttamente su `main`.
+Esempi concreti per ProgettoPCS:
+
+```bash
+git checkout -b feature/struttura-dati
+git checkout -b feature/algoritmo-principale
+git checkout -b feature/test-unitari
+git checkout -b fix/bug-lettura-input
+```
+
+Lavorate **sempre su un branch separato**, mai direttamente su `main`.
 
 ### 3. Salva le modifiche con un commit
 
 ```bash
-git add .                          # aggiunge tutti i file modificati
-git add src/miofile.cpp            # oppure aggiungi solo un file specifico
+git status                         # controlla cosa è cambiato
+git add .                          # aggiunge tutto
+git add src/miofile.cpp            # oppure file per file
 
-git commit -m "Aggiunge funzione di login"
+git commit -m "Implementa classe Mesh con lettura da file"
 ```
 
-Scrivi messaggi di commit **chiari e brevi** (cosa hai fatto, non come).
+Messaggi di commit utili: scrivi **cosa hai fatto**, non come. Esempi:
+
+```
+✓ "Aggiunge funzione di calcolo dell'area del triangolo"
+✓ "Fix: corregge out-of-bounds nel ciclo su celle"
+✗ "modifiche"
+✗ "aggiornato file"
+```
 
 ### 4. Manda il branch su GitHub
 
@@ -77,9 +126,19 @@ Scrivi messaggi di commit **chiari e brevi** (cosa hai fatto, non come).
 git push origin nome-branch
 ```
 
+La prima volta Git potrebbe chiederti di impostare l'upstream — accetta con:
+
+```bash
+git push --set-upstream origin nome-branch
+```
+
 ### 5. Apri una Pull Request su GitHub
 
-Dal sito GitHub: **"Compare & pull request"** → scrivi una breve descrizione → chiedi la review a un compagno → merge su `main`.
+1. Vai su [github.com/ScaccoFranco/ProgettoPCS](https://github.com/ScaccoFranco/ProgettoPCS)
+2. Clicca **"Compare & pull request"** (appare dopo il push)
+3. Scrivi una breve descrizione di cosa hai fatto
+4. Assegna la review a un compagno del gruppo
+5. Dopo la review → **"Merge pull request"** → **"Delete branch"**
 
 ### 6. Dopo il merge, aggiorna il tuo main locale
 
@@ -94,11 +153,13 @@ git pull origin main
 
 | Comando | Cosa fa |
 |--------|---------|
-| `git status` | Mostra cosa è stato modificato/aggiunto |
-| `git log --oneline` | Mostra la storia dei commit in modo compatto |
-| `git diff` | Mostra le differenze non ancora committate |
+| `git status` | Mostra i file modificati/aggiunti/non tracciati |
+| `git log --oneline` | Storia dei commit in modo compatto |
+| `git log --oneline --graph --all` | Grafico visivo di tutti i branch |
+| `git diff` | Differenze non ancora committate |
+| `git diff HEAD~1` | Differenze rispetto all'ultimo commit |
 | `git branch` | Elenca i branch locali |
-| `git branch -a` | Elenca tutti i branch (anche remoti) |
+| `git branch -a` | Tutti i branch, anche remoti |
 | `git checkout main` | Torna sul branch main |
 | `git stash` | Mette da parte le modifiche temporaneamente |
 | `git stash pop` | Ripristina le modifiche messe da parte |
@@ -107,74 +168,44 @@ git pull origin main
 
 ## Gestire i conflitti
 
-Succede quando due persone modificano **la stessa riga** dello stesso file.
+Succede quando due persone modificano **la stessa riga** dello stesso file. Git lo segnala così:
 
-```bash
-# Git segnalerà il conflitto così nel file:
+```
 <<<<<<< HEAD
-tua versione
+// tua versione
+double calcola_area(Triangolo t) { return t.base * t.altezza / 2; }
 =======
-versione dell'altro
->>>>>>> nome-branch
+// versione dell'altro
+double calcola_area(Triangolo t) { return 0.5 * t.base * t.altezza; }
+>>>>>>> feature/algoritmo-principale
 ```
 
 **Come risolverlo:**
 
-1. Apri il file, scegli quale versione tenere (o unisci le due)
-2. Rimuovi le righe con `<<<<`, `====`, `>>>>`
+1. Apri il file nel tuo editor, scegli quale versione tenere (o combinale)
+2. Rimuovi le righe marcatori: `<<<<<<<`, `=======`, `>>>>>>>`
 3. Salva, poi:
 
 ```bash
-git add file-in-conflitto
-git commit -m "Risolve conflitto in file-in-conflitto"
+git add src/file-in-conflitto.cpp
+git commit -m "Risolve conflitto in calcola_area"
 ```
 
-**Prevenire i conflitti:** dividetevi bene i file su cui lavorare e fate `git pull` spesso.
-
----
-
-## Comandi per la collaborazione su GitHub (CLI `gh`)
-
-Se hai installato la GitHub CLI:
-
-```bash
-gh auth login                      # autenticati
-gh repo clone utente/nome-repo     # clona una repo
-gh pr create                       # crea una pull request dal terminale
-gh pr list                         # elenca le PR aperte
-gh pr merge                        # fai il merge di una PR
-```
-
----
-
-## Workflow consigliato per 3 persone
-
-```
-main  ──────●──────────────────●──────────────────●──
-            │                  ↑                  ↑
-feature/A   └──●──●──●─────────┘                  │
-                                                   │
-feature/B           └──●──●──●────────────────────┘
-```
-
-- `main`: solo codice stabile e funzionante
-- Ogni persona lavora su un branch separato
-- Si fa merge su `main` solo dopo review (anche veloce) di un altro
+**Come prevenirli:** dividetevi i file su cui lavorare e fate `git pull` spesso.
 
 ---
 
 ## Errori comuni e come correggerli
 
-### Ho committato sul branch sbagliato
+### Ho committato sul branch sbagliato (es. su main invece che sul mio branch)
 
 ```bash
-# Sposta l'ultimo commit su un nuovo branch
-git branch nuovo-branch
-git reset HEAD~1 --hard
-git checkout nuovo-branch
+git branch mio-branch          # crea il branch con il commit sbagliato
+git reset HEAD~1 --hard        # rimuove il commit da main
+git checkout mio-branch        # passa al branch corretto
 ```
 
-### Ho scritto il messaggio di commit sbagliato (non ancora pushato)
+### Ho scritto male il messaggio del commit (non ancora pushato)
 
 ```bash
 git commit --amend -m "Messaggio corretto"
@@ -183,48 +214,61 @@ git commit --amend -m "Messaggio corretto"
 ### Voglio annullare le modifiche a un file (non ancora committato)
 
 ```bash
-git checkout -- nomefile
+git checkout -- src/nomefile.cpp
 ```
 
-### Voglio tornare a un commit precedente (per vedere com'era)
+### Ho pushato qualcosa che non dovevo
 
 ```bash
-git checkout <hash-commit>   # hash visibile con git log --oneline
-git checkout main            # per tornare alla versione corrente
+# NON usare git push --force su main (cancella la storia degli altri)
+# Invece: crea un commit che annulla le modifiche
+git revert <hash-commit>
+git push origin main
+```
+
+### Voglio vedere com'era il codice in un commit precedente
+
+```bash
+git log --oneline              # trova l'hash del commit
+git checkout <hash>            # entra in modalità "detached HEAD"
+# ... guarda il codice ...
+git checkout main              # torna alla versione corrente
 ```
 
 ---
 
-## .gitignore — file da non tracciare
-
-Crea un file `.gitignore` nella root del progetto per escludere file inutili:
+## Workflow consigliato per ProgettoPCS
 
 ```
-# Esempi comuni
-build/
-*.o
-*.exe
-.vscode/
-__pycache__/
-*.pyc
-.env
-node_modules/
+main  ──●──────────────●──────────────────●──────────────●──
+        │              ↑                  ↑              ↑
+        │  feature/    │    feature/       │   fix/       │
+        └──struttura───┘    algoritmo──────┘   bug────────┘
 ```
 
-Aggiungi e committa il `.gitignore` all'inizio del progetto.
+- `main`: solo codice **che compila e funziona**
+- Ogni membro lavora sul proprio branch
+- Merge su `main` solo dopo una rapida review di almeno un altro
 
 ---
 
 ## Riassunto del ciclo tipico
 
 ```bash
-git pull origin main           # aggiornati
-git checkout -b mia-feature    # crea branch
-# ... lavora ...
+# Inizio sessione di lavoro
+git pull origin main
+git checkout -b feature/mia-parte
+
+# ... lavora su src/, include/, test/, CMakeLists.txt ...
+
+# Salva il lavoro
 git add .
-git commit -m "Descrizione"
-git push origin mia-feature    # manda su GitHub
-# apri Pull Request su GitHub, fai merge
+git commit -m "Descrizione chiara di cosa ho fatto"
+git push origin feature/mia-parte
+
+# Su GitHub: apri Pull Request → review → merge
+
+# Fine: risincronizza il main
 git checkout main
-git pull origin main           # risincronizza
+git pull origin main
 ```
