@@ -71,7 +71,9 @@ public:
     }
     
     // differenza tra grafi
-    unidirected_graph operator-(const unidirected_graph& other) const {
+
+    template<typename T>
+    unidirected_graph<T> operator-(const unidirected_graph& other) const {
         unidirected_graph G;
         for (const auto& e : this->edges_) { // for alternativo in forma simil python
             // Se l'arco non è presente nell'altro grafo, lo aggiungiamo a G
