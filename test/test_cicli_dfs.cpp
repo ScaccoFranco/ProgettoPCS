@@ -1,7 +1,7 @@
 #include <iostream>
 #include <set>
 #include <vector>
-#include "../include/algoritmi_grafi.hpp"
+#include "../include/cicli.hpp"
 
 bool percorso_contiene(const std::vector<int>& percorso, int nodo)
 {
