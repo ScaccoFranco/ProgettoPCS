@@ -5,9 +5,9 @@
 #include <string>
 #include "circuit.hpp"
 
-circuit_graph build_graph(std::ifstream& input_file)
+circuit_graph<int> build_graph(std::ifstream& input_file)
 {
-    circuit_graph g;
+    circuit_graph<int> g;
 
     std::string line;
     

@@ -219,9 +219,9 @@ std::vector<std::vector<bool>> incidenza_de_pina (const unidirected_graph<T> G, 
             if (auto res = prodotto_scalare(Cicli[i], S[j]))
             {
                 if (*res) {
-                    if (auto res = differenza_simmetrica(S[j], S[i]))
+                    if (auto diff = differenza_simmetrica(S[j], S[i]))
                     {
-                        S[j] = *res;
+                        S[j] = *diff;
                     } 
                     else 
                     {

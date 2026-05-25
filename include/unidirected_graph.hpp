@@ -71,8 +71,6 @@ public:
     }
     
     // differenza tra grafi
-
-    template<typename T>
     unidirected_graph<T> operator-(const unidirected_graph& other) const {
         unidirected_graph G;
         for (const auto& e : this->edges_) { // for alternativo in forma simil python

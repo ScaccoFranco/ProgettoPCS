@@ -14,13 +14,18 @@ find_package(Eigen3 REQUIRED)
 
 
 # eseguibile test
-set(SRC_test test/test_cicli_dfs.cpp include/cicli.hpp)
+set(SRC_test test/test_cicli_dfs.cpp)
 add_executable(test_cicli_dfs ${SRC_test})
 add_test(NAME cicli_dfs COMMAND test_cicli_dfs)
 
-set(SRC_test test/test_de_pina.cpp include/cicli.hpp)
+set(SRC_test test/test_de_pina.cpp)
 add_executable(test_de_pina ${SRC_test})
 add_test(NAME de_pina COMMAND test_de_pina)
+
+
+set(SRC_test test/test_circuit.cpp)
+add_executable(test_circuit ${SRC_test})
+add_test(NAME circuit COMMAND test_circuit)
 
 enable_testing()
 
