@@ -88,6 +88,8 @@ private:
     bool sign_;
 
 public: 
+    LiftingNode() : value_(T{}), sign_(false) {}
+
     LiftingNode(const T& value, const bool& sign) : value_(value), sign_(sign) {}
 
     T value() {
@@ -158,7 +160,7 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
         LiftingNode<T> u_minus = {node, true};
 
         DijkstraResult<LiftingNode<T>> res  = dijkstra(Gprimo, u_minus);
-        unidirected_graph<LiftingNode<T>> path = get_path(res, u_minus, u_plus);
+        std::vector<LiftingNode<T>> path = get_path_vec(res, u_minus, u_plus);
 
         if (path.empty()) continue;
 
@@ -217,20 +219,24 @@ std::vector<std::vector<bool>> incidenza_de_pina (const unidirected_graph<T> G, 
             if (auto res = prodotto_scalare(Cicli[i], S[j]))
             {
                 if (*res) {
-                    if (!(S[j] = differenza_simmetrica(S[j], S[i])))
+                    if (auto res = differenza_simmetrica(S[j], S[i]))
+                    {
+                        S[j] = *res;
+                    } 
+                    else 
                     {
                         std::cerr << "Vettori con lunghezze diverse nella differenza simmetrica!";
                     }
                 }
             }
-            else {
+            else 
+            {
                 std::cerr << "Prodotto scalare tra vettori di lunghezza diversa";
             }
         }
     }
 
     return Cicli;
-
 }
 
 template<typename T>

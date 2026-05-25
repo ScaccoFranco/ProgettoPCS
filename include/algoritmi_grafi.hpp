@@ -8,6 +8,7 @@
 #include <vector>
 #include <stdexcept> 
 #include <limits>
+#include <algorithm>
 #include "unidirected_graph.hpp"
 
 template<typename T>
@@ -169,5 +170,25 @@ unidirected_graph<T> get_path(const DijkstraResult<T>& r, T sorgente, T destinaz
         path.add_edge(current, next);
         current = next; 
     }
+    return path;
+}
+
+template<typename T>
+std::vector<T> get_path_vec(const DijkstraResult<T>& r, T sorgente, T destinazione)
+{
+    // nodo non raggiungibile
+    if (r.dist.find(destinazione) == r.dist.end() ||
+        r.dist.at(destinazione) == std::numeric_limits<int>::max())
+        return {};
+
+    std::vector<T> path;
+    T current = destinazione;
+    while (current != sorgente)
+    {
+        path.push_back(current);
+        current = r.prev.at(current);
+    }
+    path.push_back(sorgente);
+    std::reverse(path.begin(), path.end());
     return path;
 }
