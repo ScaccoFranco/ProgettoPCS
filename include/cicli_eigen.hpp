@@ -126,7 +126,6 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
         {
             T u = path[i].value();
             T v = path[i+1].value();
-            int id = G.edge_number(unidirected_edge<T>(u, v));
 
             int id = G.edge_number(unidirected_edge<T>(u, v));
             if (id < 0 || id >= m)
@@ -178,8 +177,8 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
             std::cerr << "edge_number fuori range: " << id << " per arco (" << u << "," << v << ")\n";
             continue;
         }
-        
-        S(iter, G.edge_number(edge)) = 1;
+
+        S(iter, id) = 1;
         iter++;
     }
 
