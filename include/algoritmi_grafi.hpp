@@ -6,28 +6,24 @@
 #include <set>
 #include <map>
 #include <vector>
-#include <stdexcept> 
+#include <stdexcept>
 #include <limits>
 #include <algorithm>
 #include "unidirected_graph.hpp"
 
+// ============================================================
+//  Contenitori per la visita: cambiando contenitore la stessa
+//  graph_visit fa BFS (fifo) o DFS (lifo). Sono template.
+// ============================================================
 template<typename T>
 class fifo
 {
 private:
     std::queue<T> q;
-
 public:
-    void put(T x) {
-        q.push(x); 
-    }
-    T get() { 
-        T x = q.front(); 
-        q.pop(); return x; 
-    }
-    bool empty() { 
-        return q.empty(); 
-    }
+    void put(T x) { q.push(x); }
+    T get() { T x = q.front(); q.pop(); return x; }
+    bool empty() { return q.empty(); }
 };
 
 template<typename T>
@@ -35,69 +31,55 @@ class lifo
 {
 private:
     std::stack<T> s;
-    
 public:
-    void put(T x) { 
-        s.push(x); 
-    }
-    T get() { 
-        T x = s.top(); 
-        s.pop(); return x; 
-    }
-    bool empty() { 
-        return s.empty(); 
-    }
+    void put(T x) { s.push(x); }
+    T get() { T x = s.top(); s.pop(); return x; }
+    bool empty() { return s.empty(); }
 };
 
+// visita generica: restituisce l'albero di visita
 template<typename T, typename Contenitore>
 unidirected_graph<T> graph_visit(const unidirected_graph<T>& G, T sorgente, Contenitore contenitore)
 {
-    unidirected_graph<T> albero;  // grafo risultante (l'albero di visita)
-    std::set<T> visitati; // nodi già visitati, uso set e non array di booleani, più semplice (ma piu spazio ma vabbe)
+    unidirected_graph<T> albero;
+    std::set<T> visitati;
 
     contenitore.put(sorgente);
     visitati.insert(sorgente);
 
     while (!contenitore.empty())
     {
-
-        T nodo = contenitore.get();    // estrae dalla testa (fifo) o dalla cima (lifo), vista in ampiezza o profondità
-
+        T nodo = contenitore.get();
         for (const T& vicino : G.neighbors(nodo))
         {
-            if (visitati.find(vicino) == visitati.end())  // se non ancora visitato
+            if (visitati.find(vicino) == visitati.end())
             {
                 visitati.insert(vicino);
                 contenitore.put(vicino);
-                albero.add_edge(nodo, vicino); // arco dell'albero di visita
+                albero.add_edge(nodo, vicino);
             }
         }
     }
-
     return albero;
 }
 
-
-// uso stessa lgica del dfs iterativo ma uso la ricorsione per i vicini dei vicini ecc
-
-// dentro la funzione
+// ============================================================
+//  DFS ricorsiva -> albero di supporto per i cicli fondamentali
+// ============================================================
 template<typename T>
 void ricorsione(const unidirected_graph<T>& G, T nodo, std::set<T>& visitati, unidirected_graph<T>& albero)
 {
-    // ogni nodo che viene passato alla funzione diventa visitato e si cerca tra tutti i vicini che vengono ricorsivamente passati alla funzione.
-
     visitati.insert(nodo);
     for (const T& vicino : G.neighbors(nodo))
     {
-        if (visitati.find(vicino) == visitati.end())  // se non visitato
+        if (visitati.find(vicino) == visitati.end())
         {
-            albero.add_edge(nodo, vicino); // arco dell'albero
-            ricorsione(G, vicino, visitati, albero); // chiamata ricorsiva
+            albero.add_edge(nodo, vicino);
+            ricorsione(G, vicino, visitati, albero);
         }
     }
 }
 
-// da chiamare
 template<typename T>
 unidirected_graph<T> recursive_dfs (const unidirected_graph<T>& G, T sorgente)
 {
@@ -107,14 +89,15 @@ unidirected_graph<T> recursive_dfs (const unidirected_graph<T>& G, T sorgente)
     return albero;
 }
 
-
-// DIJKSTRA
+// ============================================================
+//  Dijkstra (pesi unitari): distanze e predecessori dalla sorgente.
+//  Usato per ricostruire il cammino che chiude un ciclo.
+// ============================================================
 template<typename T>
 struct DijkstraResult {
     std::map<T, int> dist;
-    std::map<T, T> prev;  // prev[v] = nodo da cui si arriva a v nel cammino minimo
+    std::map<T, T> prev;
 };
-
 
 template<typename T>
 DijkstraResult<T> dijkstra(const unidirected_graph<T>& G, T sorgente)
@@ -125,23 +108,19 @@ DijkstraResult<T> dijkstra(const unidirected_graph<T>& G, T sorgente)
         result.dist[nodo] = std::numeric_limits<int>::max();
     result.dist[sorgente] = 0;
 
-    // set di coppie (distanza, nodo) ordinato automaticamente per distanza
     std::set<std::pair<int, T>> da_visitare;
     da_visitare.insert({0, sorgente});
 
     while (!da_visitare.empty())
     {
-        // il primo elemento è sempre quello con distanza minore
         auto [d, u] = *da_visitare.begin();
         da_visitare.erase(da_visitare.begin());
 
         for (const T& vicino : G.neighbors(u))
         {
             int nuova_dist = d + 1;
-
             if (nuova_dist < result.dist[vicino])
             {
-                // rimuovi il vecchio valore e inserisci quello aggiornato
                 da_visitare.erase({result.dist[vicino], vicino});
                 result.dist[vicino] = nuova_dist;
                 result.prev[vicino] = u;
@@ -153,30 +132,10 @@ DijkstraResult<T> dijkstra(const unidirected_graph<T>& G, T sorgente)
     return result;
 }
 
-
-// da capire bene, mi ha aiutato claude!!
-template<typename T>
-unidirected_graph<T> get_path(const DijkstraResult<T>& r, T sorgente, T destinazione)
-{
-    unidirected_graph<T> path;
-    // nodo non raggiungibile
-    if (r.dist.at(destinazione) == std::numeric_limits<int>::max())
-        return path;
-
-    T current = destinazione;
-    while (current != sorgente)
-    {
-        auto next = r.prev.at(current);
-        path.add_edge(current, next);
-        current = next; 
-    }
-    return path;
-}
-
+// cammino sorgente -> destinazione come sequenza di nodi
 template<typename T>
 std::vector<T> get_path_vec(const DijkstraResult<T>& r, T sorgente, T destinazione)
 {
-    // nodo non raggiungibile
     if (r.dist.find(destinazione) == r.dist.end() ||
         r.dist.at(destinazione) == std::numeric_limits<int>::max())
         return {};

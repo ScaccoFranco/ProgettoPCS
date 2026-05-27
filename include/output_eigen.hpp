@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "circuit.hpp"
+#include "circuit_eigen.hpp"
 
 template<typename T>
 void stampa_cicli(std::vector<std::vector<T>> &cycles)
@@ -14,22 +14,23 @@ void stampa_cicli(std::vector<std::vector<T>> &cycles)
     }
 }
 
-void stampa_correnti(std::vector<double> &correnti)
+void stampa_correnti(Eigen::VectorXd &correnti)
 {
     std::cout << "\nCorrenti di maglia:\n";
     for (int i = 0; i < (int)correnti.size(); i++)
-        std::cout << "I" << i+1 << " = " << correnti[i] << "\n";
+        std::cout << "I" << i+1 << " = " << correnti(i) << "\n";
 }
 
+
 template<typename T>
-void stampa_risultati(const std::vector<double> &correnti, const circuit_graph<int> &cg, const std::vector<std::vector<double>> &B, std::vector<std::vector<T>> &cycles)
+void stampa_risultati(const Eigen::VectorXd &correnti, const circuit_graph<int> &cg, const Eigen::MatrixXd &B, std::vector<std::vector<T>> &cycles)
 {
     const auto& resistori = cg.get_allresistor();
     std::cout << "\nTensioni sui resistori:\n";
     for (int k = 0; k < (int)resistori.size(); k++) {
         double corrente_k = 0.0;
         for (int j = 0; j < (int)cycles.size(); j++)
-            corrente_k += B[k][j] * correnti[j];
+            corrente_k += B(k, j) * correnti(j);
         double tensione_k = resistori[k].c_value * corrente_k;
         std::cout << "R" << resistori[k].c_number
                   << ": V = " << tensione_k << " volts"

@@ -1,11 +1,12 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <iostream>
 #include <stdexcept>
 #include <optional>
 #include <limits>
 #include "algoritmi_grafi.hpp"
-#include "circuit.hpp"
+#include "circuit_eigen.hpp"
 
 // ============================================================
 //  METODO 1 - DFS + coalbero
@@ -35,31 +36,6 @@ std::vector<std::vector<int>> find_cycles(const circuit_graph<int>& cg) {
 //  METODO 2 - Algoritmo di De Pina (cicli minimi)
 // ============================================================
 
-// prodotto scalare in GF(2): xor dei prodotti bit a bit
-std::optional<bool> prodotto_scalare(const std::vector<bool> &c, const std::vector<bool> &s)
-{
-    if (c.size() != s.size())
-        return std::nullopt;
-
-    bool res = false;
-    for (int i = 0; i < (int)s.size(); i++) {
-        res ^= c[i] && s[i];
-    }
-    return res;
-}
-
-// differenza simmetrica in GF(2): xor componente per componente
-std::optional<std::vector<bool>> differenza_simmetrica(const std::vector<bool> &c, const std::vector<bool> &s)
-{
-    if (c.size() != s.size())
-        return std::nullopt;
-
-    std::vector<bool> res(s.size(), false);
-    for (int i = 0; i < (int)s.size(); i++) {
-        res[i] = c[i] ^ s[i];
-    }
-    return res;
-}
 
 // nodo "liftato": copia del nodo con un bit di segno, usato nel grafo di lifting
 template<typename T>
@@ -159,7 +135,7 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
 
 // nucleo di De Pina: restituisce i cicli come vettori di incidenza sugli archi
 template<typename T>
-std::vector<std::vector<bool>> incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
+Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
 {
     unidirected_graph<T> DFS = recursive_dfs(G, sorgente);
     unidirected_graph<T> C = G - DFS;
@@ -168,39 +144,42 @@ std::vector<std::vector<bool>> incidenza_de_pina (const unidirected_graph<T> G, 
     int n = G.all_nodes().size();
     int k = m - n + 1;
 
-    if (k != (int)C.all_edges().size())
+    if (k != C.all_edges().size())
     {
         throw std::runtime_error("Errore: il grafo C non ha dimensione k, come dovrebbe");
     }
 
-    std::vector<std::vector<bool>> S(k, std::vector<bool>(m, false));
-    std::vector<std::vector<bool>> Cicli(k, std::vector<bool>(m, false));
+    Eigen::MatrixXi S = Eigen::MatrixXi::Zero(n, n);
+    Eigen::MatrixXi Cicli = Eigen::MatrixXi::Zero(n, n);
 
+
+    // qua  O(k^2) perché nel ciclo di lunghezza k cicla (edge_number) su tutti i nodi (al più k?)
+    // verificare se si può migliorare
     int iter = 0;
     for (const unidirected_edge<T> edge : C.all_edges())
     {
-        S[iter][G.edge_number(edge)] = true;
+        S(iter, G.edge_number(edge)) = 1;
         iter++;
     }
 
     for (int i = 0; i < k; i++)
     {
-        Cicli[i] = ciclo_minimo(m, G, S[i]);
+        // controllare se si può modificare qua ed evitare conversione in vec<bool>
+        std::vector<bool> s_i(m);
+        for (int j = 0; j < m; j++) s_i[j] = S(i, j) != 0;
+
+        std::vector<bool> c_i = ciclo_minimo(m, G, s_i);
+        for (int j = 0; j < m; j++) Cicli(i, j) = c_i[j] ? 1 : 0;
         for (int j = i+1; j < k; j++)
         {
-            if (auto res = prodotto_scalare(Cicli[i], S[j]))
-            {
-                if (*res) {
-                    if (auto diff = differenza_simmetrica(S[j], S[i]))
-                        S[j] = *diff;
-                    else
-                        std::cerr << "Vettori con lunghezze diverse nella differenza simmetrica!";
-                }
+            // Riduco a questa riga il prodotto scalare definito nel file
+            // ovvero: modulo 2 del prodotto scalare dei due vettori booleani (interi considerati booleani in questo caso)
+            bool res = (Cicli.row(i).array() * S.row(j).array()).sum() % 2 != 0;
+            if (res) {
+                // compattato anche la funzione della differenza simmetrica, ovvero lo xor dei due vettori
+                S.row(j) = (S.row(j).cwiseNotEqual(Cicli.row(i))).cast<int>();
             }
-            else
-            {
-                std::cerr << "Prodotto scalare tra vettori di lunghezza diversa";
-            }
+            // CHIEDERE AL PROF SE é MEGLIO MANTENERE I CONTROLLI CHE C'ERANO PRIMA
         }
     }
 
@@ -209,13 +188,13 @@ std::vector<std::vector<bool>> incidenza_de_pina (const unidirected_graph<T> G, 
 
 // converte un vettore di incidenza sugli archi in sequenza di nodi (ciclo aperto)
 template<typename T>
-std::vector<T> incidenza_to_nodi(const std::vector<bool>& C, const unidirected_graph<T>& G)
+std::vector<T> incidenza_to_nodi(const Eigen::RowVectorXi& C, const unidirected_graph<T>& G)
 {
     std::map<T, std::vector<T>> adj;
     int m = C.size();
     for (int i = 0; i < m; i++)
     {
-        if (C[i]) {
+        if (C(i)) {
             auto e = G.edge_at(i);
             adj[e.from()].push_back(e.to());
             adj[e.to()].push_back(e.from());
@@ -243,18 +222,18 @@ std::vector<T> incidenza_to_nodi(const std::vector<bool>& C, const unidirected_g
 }
 
 // De Pina completo. Restituisce cicli CHIUSI [n0,...,nk,n0],
-// coerenti con find_cycles cosi' i due metodi sono interscambiabili.
 template<typename T>
 std::vector<std::vector<T>> de_pina(const unidirected_graph<T>& G)
 {
     T sorgente = *G.all_nodes().begin();
-    auto incidenze = incidenza_de_pina(G, sorgente);
+    Eigen::MatrixXi incidenze = incidenza_de_pina(G, sorgente);
 
     std::vector<std::vector<T>> result;
-    for (const auto& C : incidenze) {
-        std::vector<T> nodi = incidenza_to_nodi(C, G);
+    for (int i = 0; i < incidenze.rows(); i++)
+    {
+        std::vector<T> nodi = incidenza_to_nodi(incidenze.row(i), G);
         if (!nodi.empty())
-            nodi.push_back(nodi.front());   // chiude il ciclo
+            nodi.push_back(nodi.front());
         result.push_back(nodi);
     }
     return result;

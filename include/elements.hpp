@@ -3,14 +3,19 @@
 #include <vector>
 #include "unidirected_graph.hpp"
 
-struct component 
+// ============================================================
+//  component: un componente del circuito (resistore o generatore).
+//  Per i generatori positive_node/negative_node danno la polarita';
+//  per i resistori sono solo i due punti di collegamento.
+// ============================================================
+struct component
 {
-    
-    char c_type;
-    int c_number;
-    double c_value;
-    int positive_node;
-    int negative_node;
+
+    char c_type;        // 'R' resistore, 'V' generatore
+    int c_number;       // numero progressivo (R1, V2, ...)
+    double c_value;     // Ohm se resistore, Volt se generatore
+    int positive_node;  // primo nodo della netlist (per V: terminale +)
+    int negative_node;  // secondo nodo della netlist (per V: terminale -)
 
     component() : c_type('\0'), c_number(0), c_value(0.0), positive_node(0), negative_node(0) {}
 
@@ -19,9 +24,12 @@ struct component
 
 };
 
-
+// ============================================================
+//  circuit_graph: modello del circuito. Per composizione usa un
+//  unidirected_graph per la topologia e vi associa i componenti.
+// ============================================================
 template<typename T>
-class circuit_graph 
+class circuit_graph
 {
     private:
 
@@ -35,15 +43,15 @@ class circuit_graph
         circuit_graph() {}
 
         void add_component (component c, int n1, int n2) {
-            
+
             graph.add_edge(n1,n2);
-            
+
             unidirected_edge<T> e(n1,n2);
-            edge_to_component[e] = c; 
+            edge_to_component[e] = c;
 
             if (c.c_type == 'R') {
-                resistors.push_back(c); 
-            } 
+                resistors.push_back(c);
+            }
             else if (c.c_type == 'V') {
                 generators.push_back(c);
             }
@@ -65,4 +73,3 @@ class circuit_graph
             return generators;
         }
 };
-

@@ -1,11 +1,11 @@
+#include <Eigen/Dense>
 #include <iostream>
 #include <fstream>
 #include "./include/elements.hpp"
 #include "./include/input.hpp"
-#include "./include/output.hpp"
-#include "./include/cicli.hpp"
-#include "./include/circuit.hpp"
-#include "./include/eigen_support.hpp"
+#include "./include/output_eigen.hpp"
+#include "./include/cicli_eigen.hpp"
+#include "./include/circuit_eigen.hpp"
 
 int main(int argc, const char *argv[])
 {

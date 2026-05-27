@@ -1,42 +1,50 @@
-#pragma once 
+#pragma once
 
 #include <Eigen/Dense>
+#include <Eigen/SVD>
+#include <vector>
+#include <iostream>
+
+// ============================================================
+//  Supporto Eigen: confina qui l'algebra lineare.
+//  Conversioni vector <-> Eigen, gradiente coniugato e
+//  risoluzione del sistema B^T R B i = v.
+//  Funzioni non-template marcate (ODR-safe).
+// ============================================================
 
 Eigen::MatrixXd to_matrix(const std::vector<std::vector<double>>& mat) {
-    
     Eigen::MatrixXd result(mat.size(), mat[0].size());
-    
-    for (int i = 0; i < mat.size(); i++) {
-        for (int j = 0; j < mat[0].size(); j++) {
+    for (int i = 0; i < (int)mat.size(); i++)
+        for (int j = 0; j < (int)mat[0].size(); j++)
             result(i, j) = mat[i][j];
-        }
-    }
-        
     return result;
 }
 
 Eigen::VectorXd to_vector(const std::vector<double>& vec) {
-    
     Eigen::VectorXd result(vec.size());
-    
-    for (int i = 0; i < vec.size(); i++) {
+    for (int i = 0; i < (int)vec.size(); i++)
         result(i) = vec[i];
-    }
-    
     return result;
 }
 
 std::vector<double> from_vector(const Eigen::VectorXd& vec) {
-    
     std::vector<double> result(vec.size());
-    
-    for (int i = 0; i < vec.size(); i++) {
+    for (int i = 0; i < (int)vec.size(); i++)
         result[i] = vec(i);
-    }
-    
     return result;
 }
 
+// numero di condizionamento (rapporto tra valore singolare massimo e minimo).
+// Utile per discutere quanto e' "facile" da risolvere il sistema.
+double condA(const Eigen::MatrixXd& A)
+{
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(A);
+    Eigen::VectorXd s = svd.singularValues();
+    return s.maxCoeff() / s.minCoeff();
+}
+
+// Gradiente coniugato: risolve A x = b con A simmetrica e definita positiva
+// (e' il caso di A = B^T R B, garantito SDP dalle resistenze positive).
 Eigen::VectorXd gradiente_coniugato(const Eigen::MatrixXd& A, const Eigen::VectorXd& b, double tol = 1.0e-12, unsigned int max_iter = 10000)
 {
     const int n = b.size();
@@ -44,31 +52,28 @@ Eigen::VectorXd gradiente_coniugato(const Eigen::MatrixXd& A, const Eigen::Vecto
     if (A.rows() != n || A.cols() != n) {
         std::cerr << "A e b incompatibili (dimensioni)";
     }
-        
-    Eigen::VectorXd x = Eigen::VectorXd::Zero(n); 
-    Eigen::VectorXd r = b - A * x;                
-    Eigen::VectorXd p = r;                     
+
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(n);
+    Eigen::VectorXd r = b - A * x;
+    Eigen::VectorXd p = r;
 
     const double r_norm_0 = r.norm();
-    
     if (r_norm_0 == 0.0)
         return x;
 
     unsigned int it = 0;
-
     while (it < max_iter && r.norm() > tol * r_norm_0)
     {
-
         const Eigen::VectorXd Ap = A * p;
-        const double pTAp = p.dot(Ap);            
+        const double pTAp = p.dot(Ap);
 
-        const double alpha_k = p.dot(r) / pTAp;  
+        const double alpha_k = p.dot(r) / pTAp;
 
-        x = x + alpha_k * p;                    
-        r = r - alpha_k * Ap;               
+        x = x + alpha_k * p;
+        r = r - alpha_k * Ap;
 
-        const double beta_k = p.dot(A * r) / pTAp; 
-        p = r - beta_k * p;                        
+        const double beta_k = p.dot(A * r) / pTAp;
+        p = r - beta_k * p;
 
         ++it;
     }
@@ -76,6 +81,7 @@ Eigen::VectorXd gradiente_coniugato(const Eigen::MatrixXd& A, const Eigen::Vecto
     return x;
 }
 
+// Costruisce A = B^T R B e risolve A i = v: restituisce le correnti di maglia.
 std::vector<double> solve_system(const std::vector<std::vector<double>>& B, const std::vector<std::vector<double>>& R, const std::vector<double>& v)
 {
     Eigen::MatrixXd B_eigen = to_matrix(B);
@@ -84,10 +90,7 @@ std::vector<double> solve_system(const std::vector<std::vector<double>>& B, cons
 
     Eigen::MatrixXd A = B_eigen.transpose() * R_eigen * B_eigen;
 
-    Eigen::VectorXd x = gradiente_coniugato(A,v_eigen);
+    Eigen::VectorXd x = gradiente_coniugato(A, v_eigen);
 
-    std::vector<double> result = from_vector(x);
-
-    return result;
-
+    return from_vector(x);
 }

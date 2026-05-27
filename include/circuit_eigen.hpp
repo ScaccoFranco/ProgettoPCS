@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <string>
+#include "eigen_support.hpp"
 #include "unidirected_graph.hpp"
 #include "elements.hpp"
 
@@ -27,7 +28,7 @@ double plus_minus(const component& resistor, const std::vector<int>& cycle) {
 
 
 template<typename T>
-Eigen::MatrixXd& build_B(const std::vector<int>& cycle, const std::vector<component>& resistors, const circuit_graph<T>& cg) {
+Eigen::MatrixXd build_B(const std::vector<std::vector<int>>& cycles, const std::vector<component>& resistors, const circuit_graph<T>& cg) {
 
     Eigen::MatrixXd B = Eigen::MatrixXd::Zero(cg.get_allresistor().size(), cycles.size());
 
@@ -38,7 +39,7 @@ Eigen::MatrixXd& build_B(const std::vector<int>& cycle, const std::vector<compon
     return B;
 }
 
-Eigen::MatrixXd& build_R(const std::vector<component>& resistors) {
+Eigen::MatrixXd build_R(const std::vector<component>& resistors) {
 
     int n = resistors.size();
     Eigen::MatrixXd R = Eigen::MatrixXd::Zero(n, n);
@@ -73,5 +74,6 @@ Eigen::VectorXd build_v(const std::vector<std::vector<int>>& cycles, const std::
 
 Eigen::VectorXd solve_system(const Eigen::MatrixXd& B, const Eigen::MatrixXd& R, Eigen::VectorXd& v)
 {
+    Eigen::MatrixXd A = B.transpose() * R * B;
     return gradiente_coniugato(A, v);
 }
