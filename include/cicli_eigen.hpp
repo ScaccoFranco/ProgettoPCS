@@ -76,7 +76,14 @@ unidirected_graph<LiftingNode<T>> lifting(const unidirected_graph<T> &G, const s
         LiftingNode<T> v_plus  = {edge.to(),   false};
         LiftingNode<T> v_minus = {edge.to(),   true};
 
-        if (S_i[G.edge_number(edge)]) {
+        int id = G.edge_number(unidirected_edge<T>(u, v));
+        if (id < 0 || id >= m)
+        {
+            std::cerr << "edge_number fuori range: " << id << " per arco (" << u << "," << v << ")\n";
+            continue;
+        }
+
+        if (S_i[id]) {
             Gprimo.add_edge(u_plus, v_minus);
             Gprimo.add_edge(u_minus, v_plus);
         } else {
@@ -120,6 +127,13 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
             T u = path[i].value();
             T v = path[i+1].value();
             int id = G.edge_number(unidirected_edge<T>(u, v));
+
+            int id = G.edge_number(unidirected_edge<T>(u, v));
+            if (id < 0 || id >= m)
+            {
+                std::cerr << "edge_number fuori range: " << id << " per arco (" << u << "," << v << ")\n";
+                continue;
+            }
             ciclo_i[id] = !ciclo_i[id]; // modulo 2
         }
 
@@ -158,6 +172,13 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
     int iter = 0;
     for (const unidirected_edge<T> edge : C.all_edges())
     {
+        int id = G.edge_number(unidirected_edge<T>(u, v));
+        if (id < 0 || id >= m)
+        {
+            std::cerr << "edge_number fuori range: " << id << " per arco (" << u << "," << v << ")\n";
+            continue;
+        }
+        
         S(iter, G.edge_number(edge)) = 1;
         iter++;
     }
