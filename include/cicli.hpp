@@ -137,10 +137,10 @@ unidirected_graph<LiftingNode<T>> lifting(const unidirected_graph<T> &G, const s
     return Gprimo;
 }
 
-int val_bool_vec(const std::vector<bool> &Corr_i)
+int val_bool_vec(const std::vector<bool> &Inc_i)
 {
     int sum = 0;
-    for (bool el : Corr_i) {
+    for (bool el : Inc_i) {
         if (el)
             sum += 1;
     }
@@ -290,4 +290,25 @@ std::vector<std::vector<T>> de_pina(const unidirected_graph<T>& G)
         result.push_back(incidenza_to_nodi(C, G));
 
     return result;
+}
+
+
+
+// per testare (dfs)
+
+std::vector<std::vector<int>> find_cycles(const circuit_graph& cg) {
+
+    unidirected_graph support_tree = recursive_dfs(cg.get_graph(), 1);
+    unidirected_graph co_tree = cg.get_graph() - support_tree;
+
+    std::vector<std::vector<int>> all_cycles;
+
+    for (const unidirected_edge& e : co_tree.all_edges()) {
+        dijkstraResult dij_result = dijkstra(support_tree, e.from());
+        std::vector<int> path = get_path(dij_result,e.from(),e.to());
+        path.push_back(e.from());
+        all_cycles.push_back(path);
+    }
+
+    return all_cycles;
 }
