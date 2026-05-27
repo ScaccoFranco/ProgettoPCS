@@ -76,14 +76,7 @@ unidirected_graph<LiftingNode<T>> lifting(const unidirected_graph<T> &G, const s
         LiftingNode<T> v_plus  = {edge.to(),   false};
         LiftingNode<T> v_minus = {edge.to(),   true};
 
-        int id = G.edge_number(unidirected_edge<T>(u, v));
-        if (id < 0 || id >= m)
-        {
-            std::cerr << "edge_number fuori range: " << id << " per arco (" << u << "," << v << ")\n";
-            continue;
-        }
-
-        if (S_i[id]) {
+        if (S_i[G.edge_number(edge)]) {
             Gprimo.add_edge(u_plus, v_minus);
             Gprimo.add_edge(u_minus, v_plus);
         } else {
@@ -162,8 +155,8 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
         throw std::runtime_error("Errore: il grafo C non ha dimensione k, come dovrebbe");
     }
 
-    Eigen::MatrixXi S = Eigen::MatrixXi::Zero(n, n);
-    Eigen::MatrixXi Cicli = Eigen::MatrixXi::Zero(n, n);
+    Eigen::MatrixXi S = Eigen::MatrixXi::Zero(k, m);
+    Eigen::MatrixXi Cicli = Eigen::MatrixXi::Zero(k, m);
 
 
     // qua  O(k^2) perché nel ciclo di lunghezza k cicla (edge_number) su tutti i nodi (al più k?)
@@ -171,10 +164,10 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
     int iter = 0;
     for (const unidirected_edge<T> edge : C.all_edges())
     {
-        int id = G.edge_number(unidirected_edge<T>(u, v));
+        int id = G.edge_number(edge);
         if (id < 0 || id >= m)
         {
-            std::cerr << "edge_number fuori range: " << id << " per arco (" << u << "," << v << ")\n";
+            std::cerr << "edge_number fuori range\n";
             continue;
         }
 
