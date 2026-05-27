@@ -3,69 +3,7 @@
 #include <vector>
 #include <string>
 #include "unidirected_graph.hpp"
-
-struct component 
-{
-    
-    char c_type;
-    int c_number;
-    double c_value;
-    int positive_node;
-    int negative_node;
-
-    component() : c_type('\0'), c_number(0), c_value(0.0), positive_node(0), negative_node(0) {}
-
-    component(const char& type, const int& number, const double& value, const int& node, const int& nodebis)
-        : c_type(type), c_number(number), c_value(value), positive_node(node), negative_node(nodebis) {}
-
-};
-
-
-template<typename T>
-class circuit_graph 
-{
-    private:
-
-        unidirected_graph<T> graph;
-        std::map<unidirected_edge<T>, component> edge_to_component;
-        std::vector<component> resistors;
-        std::vector<component> generators;
-
-    public:
-
-        circuit_graph() {}
-
-        void add_component (component c, int n1, int n2) {
-            
-            graph.add_edge(n1,n2);
-            
-            unidirected_edge<T> e(n1,n2);
-            edge_to_component[e] = c; 
-
-            if (c.c_type == 'R') {
-                resistors.push_back(c); 
-            } 
-            else if (c.c_type == 'V') {
-                generators.push_back(c);
-            }
-        }
-
-        const unidirected_graph<T>& get_graph() const {
-            return graph;
-        }
-
-        const std::map<unidirected_edge<T>, component>& get_edge_map() const {
-            return edge_to_component;
-        }
-
-        const std::vector<component>& get_allresistor() const {
-            return resistors;
-        }
-
-        const std::vector<component>& get_allgenerator() const {
-            return generators;
-        }
-};
+#include "elements.hpp"
 
 
 double plus_minus(const component& resistor, const std::vector<int>& cycle) {
@@ -109,19 +47,28 @@ std::vector<std::vector<double>> build_R(const std::vector<component>& resistors
     return R;
 }
 
+
+int gen_sign(const component& gen, const std::vector<int>& cycle) {
+    for (int i = 0; i < cycle.size() - 1; i++) {
+        if (cycle[i] == gen.negative_node && cycle[i+1] == gen.positive_node)
+            return 1;   
+        if (cycle[i] == gen.positive_node && cycle[i+1] == gen.negative_node)
+            return -1; 
+    }
+    return 0;
+}
+
 std::vector<double> build_v(const std::vector<std::vector<int>>& cycles, const std::vector<component>& generators) {
     
     std::vector<double> v(cycles.size(), 0.0);
 
     for (int i = 0; i < cycles.size(); i++) {       
-    for (int j = 0; j < generators.size(); j++){                
-       
-        int sign = plus_minus(generators[j], cycles[i]);
-        v[i] = v[i] + generators[j].c_value*(-1*(sign));
+        for (int j = 0; j < generators.size(); j++){                
+        
+            v[i] = v[i] + generators[j].c_value * gen_sign(generators[j], cycles[i]);
 
+        }
     }
-}
 
     return v;
-
 }
