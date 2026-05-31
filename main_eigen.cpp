@@ -19,7 +19,6 @@ int main(int argc, const char *argv[])
         return 1;
     }
 
-    // --- Lettura netlist e costruzione del grafo ---
     circuit_graph<int> cg = build_graph(file);
     std::cout << " \n";
 
@@ -31,14 +30,10 @@ int main(int argc, const char *argv[])
                   << " | nodi: (" << e.from() << ", " << e.to() << ")\n";
     }
 
-    // --- Cicli fondamentali (maglie) ---
-    // De Pina (cicli minimi). Per usare la DFS: auto cycles = find_cycles(cg);
-    // Entrambi restituiscono cicli CHIUSI [n0,...,nk,n0].
     auto cycles = de_pina(cg.get_graph());
 
     stampa_cicli(cycles);
 
-    // --- Sistema lineare B^T R B i = v ---
     auto B = build_B(cycles, cg.get_allresistor(), cg);
     auto R = build_R(cg.get_allresistor());
     auto v = build_v(cycles, cg.get_allgenerator());
@@ -46,7 +41,6 @@ int main(int argc, const char *argv[])
     auto correnti = solve_system(B, R, v);
     stampa_correnti(correnti);
 
-    // --- Output richiesto: tensioni (e correnti) sui resistori, v_R = R B i ---
     stampa_risultati(correnti, cg, B, cycles);
 
 }

@@ -8,15 +8,10 @@
 #include "algoritmi_grafi.hpp"
 #include "circuit_eigen.hpp"
 
-// ============================================================
-//  METODO 1 - DFS + coalbero
-//  Albero di supporto via DFS, coalbero C = G - T, e per ogni arco
-//  del coalbero si chiude il ciclo con il cammino nell'albero.
-//  Restituisce cicli CHIUSI: [n0,...,nk,n0].
-// ============================================================
 std::vector<std::vector<int>> find_cycles(const circuit_graph<int>& cg) {
 
-    unidirected_graph<int> support_tree = recursive_dfs(cg.get_graph(), 1);
+    int sorgente = *cg.get_graph().all_nodes().begin();
+    unidirected_graph<int> support_tree = recursive_dfs(cg.get_graph(), sorgente);
     unidirected_graph<int> co_tree = cg.get_graph() - support_tree;
 
     std::vector<std::vector<int>> all_cycles;
@@ -24,20 +19,13 @@ std::vector<std::vector<int>> find_cycles(const circuit_graph<int>& cg) {
     for (const unidirected_edge<int>& e : co_tree.all_edges()) {
         DijkstraResult<int> dij_result = dijkstra(support_tree, e.from());
         std::vector<int> path = get_path_vec(dij_result, e.from(), e.to());
-        path.push_back(e.from());   // chiude il ciclo
+        path.push_back(e.from());
         all_cycles.push_back(path);
     }
 
     return all_cycles;
 }
 
-
-// ============================================================
-//  METODO 2 - Algoritmo di De Pina (cicli minimi)
-// ============================================================
-
-
-// nodo "liftato": copia del nodo con un bit di segno, usato nel grafo di lifting
 template<typename T>
 class LiftingNode {
 
@@ -64,7 +52,6 @@ public:
     }
 };
 
-// costruisce il grafo di lifting rispetto al vettore di supporto S_i
 template<typename T>
 unidirected_graph<LiftingNode<T>> lifting(const unidirected_graph<T> &G, const std::vector<bool> &S_i)
 {
@@ -87,7 +74,6 @@ unidirected_graph<LiftingNode<T>> lifting(const unidirected_graph<T> &G, const s
     return Gprimo;
 }
 
-// peso di un vettore booleano (numero di archi del ciclo)
 int val_bool_vec(const std::vector<bool> &Inc_i)
 {
     int sum = 0;
@@ -97,7 +83,6 @@ int val_bool_vec(const std::vector<bool> &Inc_i)
     return sum;
 }
 
-// trova il ciclo minimo ortogonale a S_i tramite i cammini minimi nel lifting
 template<typename T>
 std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const std::vector<bool> &S_i)
 {
@@ -126,7 +111,7 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
                 std::cerr << "edge_number fuori range: " << id << " per arco (" << u << "," << v << ")\n";
                 continue;
             }
-            ciclo_i[id] = !ciclo_i[id]; // modulo 2
+            ciclo_i[id] = !ciclo_i[id];
         }
 
         int val_i = val_bool_vec(ciclo_i);
@@ -139,7 +124,6 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
     return ciclo_minimo;
 }
 
-// nucleo di De Pina: restituisce i cicli come vettori di incidenza sugli archi
 template<typename T>
 Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
 {
@@ -158,9 +142,6 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
     Eigen::MatrixXi S = Eigen::MatrixXi::Zero(k, m);
     Eigen::MatrixXi Cicli = Eigen::MatrixXi::Zero(k, m);
 
-
-    // qua  O(k^2) perché nel ciclo di lunghezza k cicla (edge_number) su tutti i nodi (al più k?)
-    // verificare se si può migliorare
     int iter = 0;
     for (const unidirected_edge<T> edge : C.all_edges())
     {
@@ -177,7 +158,7 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
 
     for (int i = 0; i < k; i++)
     {
-        // controllare se si può modificare qua ed evitare conversione in vec<bool>
+
         std::vector<bool> s_i(m);
         for (int j = 0; j < m; j++) s_i[j] = S(i, j) != 0;
 
@@ -185,21 +166,19 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
         for (int j = 0; j < m; j++) Cicli(i, j) = c_i[j] ? 1 : 0;
         for (int j = i+1; j < k; j++)
         {
-            // Riduco a questa riga il prodotto scalare definito nel file
-            // ovvero: modulo 2 del prodotto scalare dei due vettori booleani (interi considerati booleani in questo caso)
+
             bool res = (Cicli.row(i).array() * S.row(j).array()).sum() % 2 != 0;
             if (res) {
-                // compattato anche la funzione della differenza simmetrica, ovvero lo xor dei due vettori
+
                 S.row(j) = (S.row(j).cwiseNotEqual(Cicli.row(i))).cast<int>();
             }
-            // CHIEDERE AL PROF SE é MEGLIO MANTENERE I CONTROLLI CHE C'ERANO PRIMA
+
         }
     }
 
     return Cicli;
 }
 
-// converte un vettore di incidenza sugli archi in sequenza di nodi (ciclo aperto)
 template<typename T>
 std::vector<T> incidenza_to_nodi(const Eigen::RowVectorXi& C, const unidirected_graph<T>& G)
 {
@@ -234,7 +213,6 @@ std::vector<T> incidenza_to_nodi(const Eigen::RowVectorXi& C, const unidirected_
     return percorso;
 }
 
-// De Pina completo. Restituisce cicli CHIUSI [n0,...,nk,n0],
 template<typename T>
 std::vector<std::vector<T>> de_pina(const unidirected_graph<T>& G)
 {

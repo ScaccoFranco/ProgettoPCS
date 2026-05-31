@@ -11,10 +11,6 @@
 #include <algorithm>
 #include "unidirected_graph.hpp"
 
-// ============================================================
-//  Contenitori per la visita: cambiando contenitore la stessa
-//  graph_visit fa BFS (fifo) o DFS (lifo). Sono template.
-// ============================================================
 template<typename T>
 class fifo
 {
@@ -37,7 +33,6 @@ public:
     bool empty() { return s.empty(); }
 };
 
-// visita generica: restituisce l'albero di visita
 template<typename T, typename Contenitore>
 unidirected_graph<T> graph_visit(const unidirected_graph<T>& G, T sorgente, Contenitore contenitore)
 {
@@ -63,9 +58,6 @@ unidirected_graph<T> graph_visit(const unidirected_graph<T>& G, T sorgente, Cont
     return albero;
 }
 
-// ============================================================
-//  DFS ricorsiva -> albero di supporto per i cicli fondamentali
-// ============================================================
 template<typename T>
 void ricorsione(const unidirected_graph<T>& G, T nodo, std::set<T>& visitati, unidirected_graph<T>& albero)
 {
@@ -89,10 +81,6 @@ unidirected_graph<T> recursive_dfs (const unidirected_graph<T>& G, T sorgente)
     return albero;
 }
 
-// ============================================================
-//  Dijkstra (pesi unitari): distanze e predecessori dalla sorgente.
-//  Usato per ricostruire il cammino che chiude un ciclo.
-// ============================================================
 template<typename T>
 struct DijkstraResult {
     std::map<T, int> dist;
@@ -132,7 +120,6 @@ DijkstraResult<T> dijkstra(const unidirected_graph<T>& G, T sorgente)
     return result;
 }
 
-// cammino sorgente -> destinazione come sequenza di nodi
 template<typename T>
 std::vector<T> get_path_vec(const DijkstraResult<T>& r, T sorgente, T destinazione)
 {

@@ -5,11 +5,6 @@
 #include <string>
 #include "elements.hpp"
 
-// ============================================================
-//  Parser della netlist.
-//  Formato riga: <tipo+numero> <valore> <nodo1> <nodo2>
-//  Robusto rispetto a spaziatura e righe vuote (il >> fallito -> continue).
-// ============================================================
 circuit_graph<int> build_graph(std::ifstream& input_file)
 {
     circuit_graph<int> g;

@@ -21,7 +21,6 @@ void stampa_correnti(Eigen::VectorXd &correnti)
         std::cout << "I" << i+1 << " = " << correnti(i) << "\n";
 }
 
-
 template<typename T>
 void stampa_risultati(const Eigen::VectorXd &correnti, const circuit_graph<int> &cg, const Eigen::MatrixXd &B, std::vector<std::vector<T>> &cycles)
 {

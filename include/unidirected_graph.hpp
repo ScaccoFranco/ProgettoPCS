@@ -7,34 +7,26 @@
 #include <stdexcept>
 #include "unidirected_edge.hpp"
 
-// ============================================================
-//  Grafo non orientato (templated sul tipo del nodo)
-//  Mantiene la lista di adiacenza e un vettore di archi numerati.
-// ============================================================
 template<typename T>
 class unidirected_graph
 {
 
 private:
-    // lista di adiacenza: per ogni nodo l'insieme dei vicini
+
     std::map<T, std::set<T>> adj_;
 
-    // vettore degli archi: serve a numerarli (indice = posizione nel vettore)
     std::vector<unidirected_edge<T>> edges_;
-
 
 public:
     unidirected_graph() = default;
 
     unidirected_graph(const unidirected_graph& other) : adj_(other.adj_), edges_(other.edges_) {}
 
-    // vicini di un nodo (insieme vuoto se il nodo non esiste)
     std::set<T> neighbors(T node) const {
         if (adj_.count(node)) return adj_.at(node);
         return {};
     }
 
-    // aggiunge un arco solo se non gia' presente
     void add_edge(T u, T v) {
         unidirected_edge<T> new_edge(u, v);
 
@@ -58,7 +50,6 @@ public:
         return nodes;
     }
 
-    // indice numerico di un arco (-1 se assente). Usato da De Pina.
     int edge_number(unidirected_edge<T> edge) const {
         for (int i = 0; i < edges_.size(); i++) {
             if (edges_[i] == edge) return i;
@@ -66,14 +57,11 @@ public:
         return -1;
     }
 
-    // arco a un dato indice
     unidirected_edge<T> edge_at(int index) const {
         if (index < 0 || index >= edges_.size()) throw std::out_of_range("Indice fuori limite");
         return edges_[index];
     }
 
-    // differenza tra grafi: tiene gli archi di *this non presenti in other.
-    // Usato per il coalbero C = G - T.
     unidirected_graph<T> operator-(const unidirected_graph& other) const {
         unidirected_graph G;
         for (const auto& e : this->edges_) {
