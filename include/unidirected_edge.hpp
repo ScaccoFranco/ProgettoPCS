@@ -2,6 +2,11 @@
 
 #include <ostream>
 
+// Rappresenta un singolo arco non orientato. La logica chiave è: 
+// i due nodi vengono sempre salvati ordinandoli dal minore al maggiore. 
+// Questo permette che l'arco (A, B) sia considerato identico 
+// all'arco (B, A), rendendo ragionevoli i confronti (operatore ==)
+
 template<typename T>
 class unidirected_edge
 {

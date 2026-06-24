@@ -7,6 +7,12 @@
 #include <stdexcept>
 #include "unidirected_edge.hpp"
 
+// Si rappresenta un grafo non orientato generico. Utilizza una lista
+// per tracciare i vicini di ogni nodo e un vettore per memorizzare gli archi.
+// Si ncludono funzioni per esplorare la struttura (nodi, archi, vicini) e implementa 
+// l'operatore di sottrazione tra grafi (operator-), usato nel progetto per 
+// isolare i lati del coalbero eliminando l'albero DFS.
+
 template<typename T>
 class unidirected_graph
 {

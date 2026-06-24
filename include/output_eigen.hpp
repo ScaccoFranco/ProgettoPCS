@@ -3,6 +3,12 @@
 #include <iostream>
 #include "circuit_eigen.hpp"
 
+// Si raccolgono le funzioni di output per un main pulito. 
+// Oltre a stampare i cicli trovati e le correnti di maglia, 
+// si esegue qui l'ultimo vero calcolo in "stampa_risultati": riapplica la matrice B 
+// alle correnti di maglia per trovare le correnti effettive su ogni ramo, 
+// e usando la legge di Ohm (V=R*I) per ricavare e stampare le tensioni finali sui resistori.
+
 template<typename T>
 void stampa_cicli(std::vector<std::vector<T>> &cycles)
 {

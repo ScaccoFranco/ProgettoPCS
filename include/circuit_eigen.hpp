@@ -7,6 +7,14 @@
 #include "unidirected_graph.hpp"
 #include "elements.hpp"
 
+// Metodo delle Correnti di Maglia. 
+// Si traducono i percorsi del grafo in equazioni lineari: "plus_minus" e "gen_sign" 
+// risolvono le difficoltà dei segni valutando come le maglie attraversano i componenti. 
+// Le funzioni "build_B", "build_R" e "build_v" assemblano rispettivamente la matrice 
+// di incidenza rami-maglie, la matrice diagonale delle resistenze e il vettore noto 
+// dei generatori. Infine, "solve_system" unisce i pezzi creando la matrice quadrata 
+// A = B^T * R * B e lo chiama la funzione per risolverlo.
+
 double plus_minus(const component& resistor, const std::vector<int>& cycle) {
 
     int start = std::min(resistor.positive_node, resistor.negative_node);

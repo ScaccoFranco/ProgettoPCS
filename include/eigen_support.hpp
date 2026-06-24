@@ -5,6 +5,13 @@
 #include <vector>
 #include <iostream>
 
+// Fa da ponte tra le strutture dati di C++ e la libreria Eigen.
+// Fornisce le funzioni di conversione tra std::vector e matrici/vettori Eigen.
+// Il fulcro è l'implementazione del Gradiente Coniugato. 
+// Poiché la matrice del sistema A = B^T * R * B è simmetrica (e semi-definita positiva)
+// il Gradiente Coniugato permette di trovare le correnti in modo molto più efficiente
+// rispetto a un'inversione della matrice.
+
 Eigen::MatrixXd to_matrix(const std::vector<std::vector<double>>& mat) {
     Eigen::MatrixXd result(mat.size(), mat[0].size());
     for (int i = 0; i < (int)mat.size(); i++)

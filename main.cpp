@@ -9,6 +9,10 @@
 
 int main(int argc, const char *argv[])
 {
+
+    // apertura del file e controllo in caso di mancato file
+    // o impossibilità ad aprire
+
     if (argc < 2) {
         std::cerr << "Errore: Mancata definizione del file \n";
         return 1;
@@ -18,6 +22,9 @@ int main(int argc, const char *argv[])
         std::cerr << "Errore: impossibile aprire: " << argv[1] << "\n";
         return 1;
     }
+
+    // costruzione del grafico attraverso build_graph() 
+    // e popolando un circuit_graph
 
     circuit_graph<int> cg = build_graph(file);
     std::cout << " \n";
@@ -30,9 +37,13 @@ int main(int argc, const char *argv[])
                   << " | nodi: (" << e.from() << ", " << e.to() << ")\n";
     }
 
-    auto cycles = de_pina(cg.get_graph());
+    // calcolo e output dei cicli minimi attraverso algoritmo di de_pina 
 
+    auto cycles = de_pina(cg.get_graph());
     stampa_cicli(cycles);
+
+    // costruzione delle matrici e del sistema lineare risolvendo
+    // attraverso il gradiente coniugato stampando i risultati
 
     auto B = build_B(cycles, cg.get_allresistor(), cg);
     auto R = build_R(cg.get_allresistor());

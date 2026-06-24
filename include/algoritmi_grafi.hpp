@@ -11,6 +11,11 @@
 #include <algorithm>
 #include "unidirected_graph.hpp"
 
+// Contiene gli algoritmi di esplorazione dei grafi.
+// Implementa la DFS ricorsiva per estrarre l'albero di supporto 
+// (usato nella ricerca base delle maglie) e l'algoritmo di Dijkstra per i cammini minimi. 
+// Dijkstra, in particolare, è il motore dell'algoritmo di De Pina.
+
 template<typename T>
 class fifo
 {

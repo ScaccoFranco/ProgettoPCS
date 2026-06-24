@@ -5,6 +5,11 @@
 #include <string>
 #include "elements.hpp"
 
+// Parser che legge la netlist riga per riga e popola il grafo del circuito. 
+// Il controllo in fase di estrazione (ss >> ...) funge da filtro di sicurezza: 
+// se una riga è vuota, scritta male o contiene caratteri non ammessi, 
+// viene semplicemente ignorata evitando che il programma abbia problemi.
+
 circuit_graph<int> build_graph(std::ifstream& input_file)
 {
     circuit_graph<int> g;

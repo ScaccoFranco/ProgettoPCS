@@ -8,6 +8,13 @@
 #include "algoritmi_grafi.hpp"
 #include "circuit_eigen.hpp"
 
+// Si trovano le maglie del circuito.
+// Si implementano le due alternative richieste dal progetto: la ricerca base 
+// (costruendo l'albero di supporto DFS e chiudendo i cicli con gli archi del coalbero) 
+// e l'algoritmo di De Pina. Quest'ultimo sfrutta la tecnica del "lifting" 
+// del grafo e l'algoritmo di Dijkstra per estrarre una base di cicli minimi indipendenti, 
+// garantendo che il sistema lineare risultante sia il più compatto e stabile possibile.
+
 std::vector<std::vector<int>> find_cycles(const circuit_graph<int>& cg) {
 
     int sorgente = *cg.get_graph().all_nodes().begin();

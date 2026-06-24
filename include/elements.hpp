@@ -3,6 +3,8 @@
 #include <vector>
 #include "unidirected_graph.hpp"
 
+// La struct "component" racchiude i dati del singolo elemento (tipo, valore, nodi). 
+
 struct component
 {
 
@@ -18,6 +20,11 @@ struct component
         : c_type(type), c_number(number), c_value(value), positive_node(node), negative_node(nodebis) {}
 
 };
+
+// La classe "circuit_graph" forma il grafo di base e associa ogni arco 
+// al suo componente fisico reale. Inoltre, si separa da subito i resistori dai generatori 
+// salvandoli in vettori dedicati, un trucco che semplifica la costruzione 
+// delle matrici R, B e del vettore v più avanti nel codice.
 
 template<typename T>
 class circuit_graph
