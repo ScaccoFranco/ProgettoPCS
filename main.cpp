@@ -62,10 +62,7 @@ int main(int argc, const char *argv[])
     Timer cronometro;
     cronometro.tic();
     auto cycles = de_pina(cg.get_graph(), usa_bfs);
-    if (misura_tempo) {
-        std::cout << "[tempo] De Pina (" << (usa_bfs ? "BFS" : "Dijkstra")
-                  << "): " << cronometro.toc() << " ms\n";
-    }
+
     stampa_cicli(cycles);
 
     // costruzione delle matrici e del sistema lineare risolvendo
@@ -80,4 +77,7 @@ int main(int argc, const char *argv[])
 
     stampa_risultati(correnti, cg, B, cycles);
 
+    if (misura_tempo) {
+        std::cout << "tempo - usando De Pina con " << (usa_bfs ? "BFS" : "Dijkstra") << ": " << cronometro.toc() << " ms\n";
+    }
 }
