@@ -3,9 +3,10 @@
 #include <fstream>
 #include "./include/elements.hpp"
 #include "./include/input.hpp"
-#include "./include/output_eigen.hpp"
-#include "./include/cicli_eigen.hpp"
-#include "./include/circuit_eigen.hpp"
+#include "./include/output.hpp"
+#include "./include/cicli.hpp"
+#include "./include/circuit.hpp"
+#include "./include/timer.hpp"
 
 int main(int argc, const char *argv[])
 {
@@ -15,11 +16,29 @@ int main(int argc, const char *argv[])
 
     if (argc < 2) {
         std::cerr << "Errore: Mancata definizione del file \n";
+        std::cerr << "Uso: " << argv[0] << " <file> [--bfs] [--time]\n";
         return 1;
     }
-    std::ifstream file(argv[1]);
+
+    //   --bfs   usa la BFS al posto di Dijkstra dentro De Pina
+    //   --time  misura e stampa il tempo impiegato dal calcolo dei cicli
+    bool usa_bfs = false;
+    bool misura_tempo = false;
+    const char* nome_file = nullptr;
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "--bfs") usa_bfs = true;
+        else if (arg == "--time") misura_tempo = true;
+        else if (nome_file == nullptr) nome_file = argv[i];
+    }
+    if (nome_file == nullptr) {
+        std::cerr << "Errore: Mancata definizione del file \n";
+        return 1;
+    }
+
+    std::ifstream file(nome_file);
     if (!file.is_open()) {
-        std::cerr << "Errore: impossibile aprire: " << argv[1] << "\n";
+        std::cerr << "Errore: impossibile aprire: " << nome_file << "\n";
         return 1;
     }
 
@@ -37,9 +56,16 @@ int main(int argc, const char *argv[])
                   << " | nodi: (" << e.from() << ", " << e.to() << ")\n";
     }
 
-    // calcolo e output dei cicli minimi attraverso algoritmo di de_pina 
+    // calcolo e output dei cicli minimi attraverso algoritmo di de_pina
+    // (con scelta dell'algoritmo di cammino minimo e misurazione opzionale)
 
-    auto cycles = de_pina(cg.get_graph());
+    Timer cronometro;
+    cronometro.tic();
+    auto cycles = de_pina(cg.get_graph(), usa_bfs);
+    if (misura_tempo) {
+        std::cout << "[tempo] De Pina (" << (usa_bfs ? "BFS" : "Dijkstra")
+                  << "): " << cronometro.toc() << " ms\n";
+    }
     stampa_cicli(cycles);
 
     // costruzione delle matrici e del sistema lineare risolvendo

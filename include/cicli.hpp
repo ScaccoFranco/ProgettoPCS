@@ -6,7 +6,7 @@
 #include <optional>
 #include <limits>
 #include "algoritmi_grafi.hpp"
-#include "circuit_eigen.hpp"
+#include "circuit.hpp"
 
 // Si trovano le maglie del circuito.
 // Si implementano le due alternative richieste dal progetto: la ricerca base 
@@ -91,7 +91,7 @@ int val_bool_vec(const std::vector<bool> &Inc_i)
 }
 
 template<typename T>
-std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const std::vector<bool> &S_i)
+std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const std::vector<bool> &S_i, bool usa_bfs = false)
 {
     unidirected_graph<LiftingNode<T>> Gprimo = lifting(G, S_i);
     std::vector<bool> ciclo_minimo(m, false);
@@ -101,7 +101,7 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
         LiftingNode<T> u_plus  = {node, false};
         LiftingNode<T> u_minus = {node, true};
 
-        DijkstraResult<LiftingNode<T>> res  = dijkstra(Gprimo, u_minus);
+        DijkstraResult<LiftingNode<T>> res  = cammino_minimo(Gprimo, u_minus, usa_bfs); // se vero usa bfs, di standard usa dijkstra!!
         std::vector<LiftingNode<T>> path = get_path_vec(res, u_minus, u_plus);
 
         if (path.empty()) continue;
@@ -132,7 +132,7 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
 }
 
 template<typename T>
-Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
+Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente, bool usa_bfs = false)
 {
     unidirected_graph<T> DFS = recursive_dfs(G, sorgente);
     unidirected_graph<T> C = G - DFS;
@@ -169,7 +169,7 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente)
         std::vector<bool> s_i(m);
         for (int j = 0; j < m; j++) s_i[j] = S(i, j) != 0;
 
-        std::vector<bool> c_i = ciclo_minimo(m, G, s_i);
+        std::vector<bool> c_i = ciclo_minimo(m, G, s_i, usa_bfs);
         for (int j = 0; j < m; j++) Cicli(i, j) = c_i[j] ? 1 : 0;
         for (int j = i+1; j < k; j++)
         {
@@ -221,10 +221,10 @@ std::vector<T> incidenza_to_nodi(const Eigen::RowVectorXi& C, const unidirected_
 }
 
 template<typename T>
-std::vector<std::vector<T>> de_pina(const unidirected_graph<T>& G)
+std::vector<std::vector<T>> de_pina(const unidirected_graph<T>& G, bool usa_bfs = false)
 {
     T sorgente = *G.all_nodes().begin();
-    Eigen::MatrixXi incidenze = incidenza_de_pina(G, sorgente);
+    Eigen::MatrixXi incidenze = incidenza_de_pina(G, sorgente, usa_bfs);
 
     std::vector<std::vector<T>> result;
     for (int i = 0; i < incidenze.rows(); i++)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "circuit_eigen.hpp"
+#include "circuit.hpp"
 
 // Si raccolgono le funzioni di output per un main pulito. 
 // Oltre a stampare i cicli trovati e le correnti di maglia, 

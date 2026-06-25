@@ -2,7 +2,7 @@
 #include <vector>
 #include <cassert>
 #include "../include/elements.hpp"
-#include "../include/circuit_eigen.hpp"
+#include "../include/circuit.hpp"
 
 void test_segni_resistenze() {
     component res('R', 1, 10.0, 1, 2); // Nodo min 1, max 2

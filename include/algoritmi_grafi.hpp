@@ -125,6 +125,47 @@ DijkstraResult<T> dijkstra(const unidirected_graph<T>& G, T sorgente)
     return result;
 }
 
+
+// BFS: cammini minimi su grafo a peso unitario, alternativa a dijkstra().
+// Restituisce lo stesso DijkstraResult<T> per riusare get_path_vec().
+// Riusa il contenitore fifo<T> definito sopra (stessa logica di graph_visit).
+template<typename T>
+DijkstraResult<T> bfs(const unidirected_graph<T>& G, T sorgente)
+{
+    DijkstraResult<T> result;
+ 
+    for (const T& nodo : G.all_nodes())
+        result.dist[nodo] = std::numeric_limits<int>::max();
+    result.dist[sorgente] = 0;
+ 
+    fifo<T> coda;
+    coda.put(sorgente);
+ 
+    while (!coda.empty())
+    {
+        T u = coda.get();
+        for (const T& vicino : G.neighbors(u))
+        {
+            if (result.dist[vicino] == std::numeric_limits<int>::max())
+            {
+                result.dist[vicino] = result.dist[u] + 1;
+                result.prev[vicino] = u;
+                coda.put(vicino);
+            }
+        }
+    }
+ 
+    return result;
+}
+ 
+// Wrapper che instrada su bfs() o dijkstra() in base al flag.
+template<typename T>
+DijkstraResult<T> cammino_minimo(const unidirected_graph<T>& G, T sorgente, bool usa_bfs)
+{
+    return usa_bfs ? bfs(G, sorgente) : dijkstra(G, sorgente);
+}
+
+
 template<typename T>
 std::vector<T> get_path_vec(const DijkstraResult<T>& r, T sorgente, T destinazione)
 {
