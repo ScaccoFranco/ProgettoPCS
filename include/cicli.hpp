@@ -15,17 +15,18 @@
 // del grafo e l'algoritmo di Dijkstra per estrarre una base di cicli minimi indipendenti, 
 // garantendo che il sistema lineare risultante sia il più compatto e stabile possibile.
 
-std::vector<std::vector<int>> find_cycles(const circuit_graph<int>& cg) {
+template<typename T>
+std::vector<std::vector<T>> find_cycles(const unidirected_graph<T>& G, bool usa_bfs = false) {
 
-    int sorgente = *cg.get_graph().all_nodes().begin();
-    unidirected_graph<int> support_tree = recursive_dfs(cg.get_graph(), sorgente);
-    unidirected_graph<int> co_tree = cg.get_graph() - support_tree;
+    T sorgente = *G.all_nodes().begin();
+    unidirected_graph<T> support_tree = recursive_dfs(G, sorgente);
+    unidirected_graph<T> co_tree = G - support_tree;
 
-    std::vector<std::vector<int>> all_cycles;
+    std::vector<std::vector<T>> all_cycles;
 
-    for (const unidirected_edge<int>& e : co_tree.all_edges()) {
-        DijkstraResult<int> dij_result = dijkstra(support_tree, e.from());
-        std::vector<int> path = get_path_vec(dij_result, e.from(), e.to());
+    for (const unidirected_edge<T>& e : co_tree.all_edges()) {
+        DijkstraResult<T> dij_result = cammino_minimo(support_tree, e.from(), usa_bfs);
+        std::vector<T> path = get_path_vec(dij_result, e.from(), e.to());
         path.push_back(e.from());
         all_cycles.push_back(path);
     }

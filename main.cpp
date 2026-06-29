@@ -16,19 +16,24 @@ int main(int argc, const char *argv[])
 
     if (argc < 2) {
         std::cerr << "Errore: Mancata definizione del file \n";
-        std::cerr << "Uso: " << argv[0] << " <file> [--bfs] [--time]\n";
+        std::cerr << "Uso: " << argv[0] << " <file> [--bfs] [--time] [--no-minimi]\n";
         return 1;
     }
 
     //   --bfs   usa la BFS al posto di Dijkstra dentro De Pina
     //   --time  misura e stampa il tempo impiegato dal calcolo dei cicli
+    //   --no-minimi usa la funzione find_cycles invece di de pina, quindi non cerca cicli minimi
+
     bool usa_bfs = false;
     bool misura_tempo = false;
+    bool usa_find_cycles = false;
+
     const char* nome_file = nullptr;
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "--bfs") usa_bfs = true;
         else if (arg == "--time") misura_tempo = true;
+        else if (arg == "--no-minimi") usa_find_cycles = true;
         else if (nome_file == nullptr) nome_file = argv[i];
     }
     if (nome_file == nullptr) {
@@ -61,7 +66,7 @@ int main(int argc, const char *argv[])
 
     Timer cronometro;
     cronometro.tic();
-    auto cycles = de_pina(cg.get_graph(), usa_bfs);
+    auto cycles = usa_find_cycles ? find_cycles(cg.get_graph()) : de_pina(cg.get_graph(), usa_bfs);
 
     stampa_cicli(cycles);
 
@@ -78,6 +83,6 @@ int main(int argc, const char *argv[])
     stampa_risultati(correnti, cg, B, cycles);
 
     if (misura_tempo) {
-        std::cout << "tempo - usando De Pina con " << (usa_bfs ? "BFS" : "Dijkstra") << ": " << cronometro.toc() << " ms\n";
+        std::cout << "tempo - usando " << (usa_find_cycles ? "find_cycles" : "De Pina") << " con " << (usa_bfs ? "BFS" : "Dijkstra") << ": " << cronometro.toc() << " ms\n";
     }
 }
