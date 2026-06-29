@@ -7,13 +7,10 @@
 #include "../include/cicli.hpp"
 #include "../include/circuit.hpp"
 
-// find_cycles e de_pina trovano DUE BASI DIVERSE dello spazio dei cicli:
-// find_cycles la base fondamentale del coalbero, de_pina la base minima.
 // Le liste di cicli non sono uguali e non ha senso confrontarle nodo per nodo.
 // Cio' che invece deve coincidere e' il risultato fisico, cioe' le correnti
 // sui rami: non dipende da quale base di cicli si sceglie.
-Eigen::VectorXd correnti_con(std::vector<std::vector<int>>& cicli,
-                             const circuit_graph<int>& cg)
+Eigen::VectorXd correnti_con(std::vector<std::vector<int>>& cicli, const circuit_graph<int>& cg)
 {
     auto B = build_B(cicli, cg.get_allresistor(), cg);
     auto R = build_R(cg.get_allresistor());
@@ -27,7 +24,7 @@ void test_stesse_correnti() {
     circuit_graph<int> cg = build_graph(file);
     file.close();
 
-    std::vector<std::vector<int>> cicli_albero = find_cycles(cg.get_graph());
+    std::vector<std::vector<int>> cicli_albero = find_cycles(cg.get_graph(), false);
     std::vector<std::vector<int>> cicli_depina = de_pina(cg.get_graph(), false);
 
     Eigen::VectorXd correnti_albero = correnti_con(cicli_albero, cg);
