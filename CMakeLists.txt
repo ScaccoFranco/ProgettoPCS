@@ -32,3 +32,9 @@ add_test(NAME TestParser COMMAND test_parser)
 add_executable(test_dominio tests/test_dominio.cpp)
 target_link_libraries(test_dominio Eigen3::Eigen)
 add_test(NAME TestSegniDominio COMMAND test_dominio)
+
+
+# 4. Test COnfronto De Pina find_cycles
+add_executable(test_confronto tests/test_confronto.cpp)
+target_link_libraries(test_confronto Eigen3::Eigen)
+add_test(NAME TestConfrontoRisultati COMMAND test_confronto)

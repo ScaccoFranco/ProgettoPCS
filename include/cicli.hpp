@@ -132,6 +132,22 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
     return ciclo_minimo;
 }
 
+// prodotto interno mod 2 tra due vettori di incidenza
+int dot_mod2(const Eigen::RowVectorXi& a, const Eigen::RowVectorXi& b) {
+    int somma = 0;
+    for (int t = 0; t < a.size(); t++)
+        somma += a(t) * b(t);
+    return somma % 2;
+}
+
+// somma mod 2 (XOR) componente per componente
+Eigen::RowVectorXi xor_mod2(const Eigen::RowVectorXi& a, const Eigen::RowVectorXi& b) {
+    Eigen::RowVectorXi risultato(a.size());
+    for (int t = 0; t < a.size(); t++)
+        risultato(t) = (a(t) + b(t)) % 2;
+    return risultato;
+}
+
 template<typename T>
 Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente, bool usa_bfs = false)
 {
@@ -172,16 +188,10 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente, boo
 
         std::vector<bool> c_i = ciclo_minimo(m, G, s_i, usa_bfs);
         for (int j = 0; j < m; j++) Cicli(i, j) = c_i[j] ? 1 : 0;
-        for (int j = i+1; j < k; j++)
-        {
-
-            bool res = (Cicli.row(i).array() * S.row(j).array()).sum() % 2 != 0;
-            if (res) {
-
-                S.row(j) = (S.row(j).cwiseNotEqual(Cicli.row(i))).cast<int>();
-            }
-
-        }
+        
+        for (int j = i + 1; j < k; j++)
+            if (dot_mod2(Cicli.row(i), S.row(j)) != 0)
+                S.row(j) = xor_mod2(S.row(j), S.row(i));
     }
 
     return Cicli;
