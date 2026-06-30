@@ -9,6 +9,8 @@
 // alle correnti di maglia per trovare le correnti effettive su ogni ramo, 
 // e usando la legge di Ohm (V=R*I) per ricavare e stampare le tensioni finali sui resistori.
 
+
+// stampa le maglie individuate, il numero totale di cicli trovati e, per ciascuno, la sequenza di nodi che lo compone
 template<typename T>
 void stampa_cicli(std::vector<std::vector<T>> &cycles)
 {
@@ -20,6 +22,7 @@ void stampa_cicli(std::vector<std::vector<T>> &cycles)
     }
 }
 
+// stampa le correnti di maglia, cioè la soluzione del sistema lineare BᵀRB i = v
 void stampa_correnti(Eigen::VectorXd &correnti)
 {
     std::cout << "\nCorrenti di maglia:\n";
@@ -27,6 +30,10 @@ void stampa_correnti(Eigen::VectorXd &correnti)
         std::cout << "I" << i+1 << " = " << correnti(i) << "\n";
 }
 
+
+// produce il risultato vero richiesto dal progetto. 
+// Per ogni resistore ricalcola la corrente effettiva di ramo come I_k = Σ_j B(k,j)·I_j
+// e poi la tensione con la legge di Ohm V = R·I, stampando entrambe
 template<typename T>
 void stampa_risultati(const Eigen::VectorXd &correnti, const circuit_graph<int> &cg, const Eigen::MatrixXd &B, std::vector<std::vector<T>> &cycles)
 {

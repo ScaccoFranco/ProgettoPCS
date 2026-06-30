@@ -6,7 +6,6 @@
 #include <optional>
 #include <limits>
 #include "algoritmi_grafi.hpp"
-#include "circuit.hpp"
 
 // Si trovano le maglie del circuito.
 // Si implementano le due alternative richieste dal progetto: la ricerca base 
