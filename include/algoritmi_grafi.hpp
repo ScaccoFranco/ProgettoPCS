@@ -127,7 +127,7 @@ DijkstraResult<T> dijkstra(const unidirected_graph<T>& G, T sorgente)
 
 
 // BFS: cammini minimi su grafo a peso unitario, alternativa a dijkstra().
-// Restituisce lo stesso DijkstraResult<T> per riusare get_path_vec().
+// Restituisce lo stesso DijkstraResult<T> per riusare get_path().
 // Riusa il contenitore fifo<T> definito sopra (stessa logica di graph_visit).
 template<typename T>
 DijkstraResult<T> bfs(const unidirected_graph<T>& G, T sorgente)
@@ -166,11 +166,14 @@ DijkstraResult<T> cammino_minimo(const unidirected_graph<T>& G, T sorgente, bool
 }
 
 
+
+// usata in de pina:
+// funzione che seve per ricavare un percorso a partire da un DijkstraResult, non calcola direttamente
+// differenz a con la funzione successiva: questa non calcola niente, ricava solo il path seguendo i collegamenti già fatti
 template<typename T>
-std::vector<T> get_path_vec(const DijkstraResult<T>& r, T sorgente, T destinazione)
+std::vector<T> get_path(const DijkstraResult<T>& r, T sorgente, T destinazione)
 {
-    if (r.dist.find(destinazione) == r.dist.end() ||
-        r.dist.at(destinazione) == std::numeric_limits<int>::max())
+    if (r.dist.find(destinazione) == r.dist.end() || r.dist.at(destinazione) == std::numeric_limits<int>::max())
         return {};
 
     std::vector<T> path;
@@ -184,3 +187,8 @@ std::vector<T> get_path_vec(const DijkstraResult<T>& r, T sorgente, T destinazio
     std::reverse(path.begin(), path.end());
     return path;
 }
+
+
+
+// algortimi per find_cycles, ovvero il metdodo basato sul dfs
+// cicli non necessariamente minimi.

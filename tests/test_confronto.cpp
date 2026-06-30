@@ -24,7 +24,7 @@ void test_stesse_correnti() {
     circuit_graph<int> cg = build_graph(file);
     file.close();
 
-    std::vector<std::vector<int>> cicli_albero = find_cycles(cg.get_graph(), false);
+    std::vector<std::vector<int>> cicli_albero = find_cycles(cg.get_graph());
     std::vector<std::vector<int>> cicli_depina = de_pina(cg.get_graph(), false);
 
     Eigen::VectorXd correnti_albero = correnti_con(cicli_albero, cg);

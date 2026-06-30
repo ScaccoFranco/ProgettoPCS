@@ -61,6 +61,5 @@ int main(int argc, const char *argv[])
     stampa_risultati(correnti, cg, B, cycles);
 
     if (misura_tempo)
-        std::cout << "tempo - usando " << (usa_find_cycles ? "find_cycles" : "De Pina") << " con " << (usa_bfs ? "BFS" : "Dijkstra") << ": " << cronometro.toc() << " ms\n";
-
+        stampa_tempo(usa_find_cycles, usa_bfs, cronometro.toc());
 }

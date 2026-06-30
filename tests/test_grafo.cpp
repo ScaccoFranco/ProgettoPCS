@@ -39,7 +39,7 @@ void test_dijkstra() {
     g.add_edge(2, 3);
     
     DijkstraResult<int> result = dijkstra(g, 1);
-    std::vector<int> path = get_path_vec(result, 1, 3);
+    std::vector<int> path = get_path(result, 1, 3);
 
     assert(path.size() == 3);
     assert(path[0] == 1);

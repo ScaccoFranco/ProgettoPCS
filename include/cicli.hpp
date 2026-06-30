@@ -14,8 +14,41 @@
 // del grafo e l'algoritmo di Dijkstra per estrarre una base di cicli minimi indipendenti, 
 // garantendo che il sistema lineare risultante sia il più compatto e stabile possibile.
 
+
+
+// ALGORITMO 1:
 template<typename T>
-std::vector<std::vector<T>> find_cycles(const unidirected_graph<T>& G, bool usa_bfs = false) {
+bool findpath(const unidirected_graph<T>& T_albero, T u, T v, std::set<T>& visitati, std::vector<T>& path)
+{
+    visitati.insert(u);
+    path.push_back(u);
+
+    if (u == v)
+        return true;
+
+    for (const T& n : T_albero.neighbors(u))
+    {
+        if (visitati.find(n) == visitati.end())
+            if (findpath(T_albero, n, v, visitati, path))
+                return true;
+    }
+
+    path.pop_back();   // backtracking = u non porta a v
+    return false;
+}
+
+// Wrapper che inizializza visitati e path
+template<typename T>
+std::vector<T> findpath(const unidirected_graph<T>& T_albero, T u, T v)
+{
+    std::set<T> visitati;
+    std::vector<T> path;
+    findpath(T_albero, u, v, visitati, path);
+    return path;
+}
+
+template<typename T>
+std::vector<std::vector<T>> find_cycles(const unidirected_graph<T>& G) {
 
     T sorgente = *G.all_nodes().begin();
     unidirected_graph<T> support_tree = recursive_dfs(G, sorgente);
@@ -24,8 +57,7 @@ std::vector<std::vector<T>> find_cycles(const unidirected_graph<T>& G, bool usa_
     std::vector<std::vector<T>> all_cycles;
 
     for (const unidirected_edge<T>& e : co_tree.all_edges()) {
-        DijkstraResult<T> dij_result = cammino_minimo(support_tree, e.from(), usa_bfs);
-        std::vector<T> path = get_path_vec(dij_result, e.from(), e.to());
+        std::vector<T> path = findpath(support_tree, e.from(), e.to());
         path.push_back(e.from());
         all_cycles.push_back(path);
     }
@@ -102,7 +134,7 @@ std::vector<bool> ciclo_minimo(const int m, const unidirected_graph<T> &G, const
         LiftingNode<T> u_minus = {node, true};
 
         DijkstraResult<LiftingNode<T>> res  = cammino_minimo(Gprimo, u_minus, usa_bfs); // se vero usa bfs, di standard usa dijkstra!!
-        std::vector<LiftingNode<T>> path = get_path_vec(res, u_minus, u_plus);
+        std::vector<LiftingNode<T>> path = get_path(res, u_minus, u_plus);
 
         if (path.empty()) continue;
 

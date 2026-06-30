@@ -50,3 +50,13 @@ void stampa_risultati(const Eigen::VectorXd &correnti, const circuit_graph<int> 
     }
     std::cout << "\n";
 }
+
+void stampa_tempo(bool usa_find_cycles, bool usa_bfs, double time) {
+    std::cout << "tempo - usando " << (usa_find_cycles ? "find_cycles" : "De Pina");
+    
+    if (!usa_find_cycles) 
+        std::cout << " con " << (usa_bfs ? "BFS" : "Dijkstra");
+
+    std::cout << ": " << time << " ms\n";
+
+}
