@@ -179,6 +179,8 @@ Eigen::RowVectorXi xor_mod2(const Eigen::RowVectorXi& a, const Eigen::RowVectorX
     return risultato;
 }
 
+
+// funzione per ottenere i vettori eigen di incidenza di de pina
 template<typename T>
 Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente, bool usa_bfs = false)
 {
@@ -228,6 +230,7 @@ Eigen::MatrixXi incidenza_de_pina (const unidirected_graph<T> G, T sorgente, boo
     return Cicli;
 }
 
+// funzione per passare dai vettori eigen di incidenza ai nodi del ciclo
 template<typename T>
 std::vector<T> incidenza_to_nodi(const Eigen::RowVectorXi& C, const unidirected_graph<T>& G)
 {
@@ -262,6 +265,8 @@ std::vector<T> incidenza_to_nodi(const Eigen::RowVectorXi& C, const unidirected_
     return percorso;
 }
 
+
+// qua ho quindi come output un vettoredi cicli, ogni ciclo è un vettore di nodi
 template<typename T>
 std::vector<std::vector<T>> de_pina(const unidirected_graph<T>& G, bool usa_bfs = false)
 {
